@@ -1,0 +1,116 @@
+CREATE DATABASE Evento;
+
+USE Evento;
+
+CREATE TABLE Persona
+(
+psrId INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
+psrNombre varchar(50) NULL,
+psrApellido1 varchar(50) NULL,
+psrApellido2 varchar(50) NULL,
+psrTelNum varchar(15) NOT NULL,
+psrEmail varchar(50) NULL,
+psrPass varchar(150) NULL
+);
+
+
+CREATE TABLE Regalos
+(
+rglId INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
+rglDescripcion varchar(250)
+);
+
+CREATE TABLE Evento
+(
+evnId INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
+evnFecha DATE NOT NULL,
+evnCapacidadInvitados INT NOT NULL
+);
+
+
+CREATE TABLE TipoEvento
+(
+tpeId INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
+ tpeDescripcion varchar(150)
+);
+
+INSERT INTO TipoEvento(tpeDescripcion) VALUES('Boda');
+ALTER TABLE evento ADD COLUMN evnTipoEvento INT NOT NULL, ADD CONSTRAINT FOREIGN KEY(evnTipoEvento) REFERENCES tipoevento(tpeId);
+
+CREATE TABLE numlista
+(lsnID int AUTO_INCREMENT NOT NULL PRIMARY KEY);
+
+CREATE TABLE listaregalos
+(
+lsrID INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
+lsrNumLista INT NOT NULL, CONSTRAINT FOREIGN KEY(lsrNumLista) REFERENCES numlista(lsnID),
+lsrRegalo int not null, CONSTRAINT FOREIGN KEY(lsrRegalo) REFERENCES regalos(rglId)
+);
+
+
+ALTER TABLE evento ADD COLUMN evnNumLista int NOT null, ADD CONSTRAINT FOREIGN KEY(evnNumLista) REFERENCES numlista(lsnID);
+
+
+CREATE TABLE ListaPersonas
+(
+lspId int AUTO_INCREMENT PRIMARY KEY NOT NULL,
+lspPersona int NOT NULL, CONSTRAINT FOREIGN KEY(lspPersona) REFERENCES persona(psrId),
+lpsEventp int NOT NULL, CONSTRAINT FOREIGN KEY(lpsEventp) REFERENCES evento(evnId)
+);
+
+
+CREATE TABLE Confirmacion
+(
+cfrId INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
+cfrDescripcion varchar(150) NOT NULL
+);
+
+ALTER TABLE ListaPersonas ADD COLUMN lpsConfirmacion INT null,ADD CONSTRAINT FOREIGN KEY(lpsConfirmacion) REFERENCES Confirmacion(cfrId);
+
+INSERT INTO confirmacion(cfrDescripcion) VALUES('Se asistirá al evento'),('No se asistirá'),('Invitado');
+
+
+CREATE TABLE RegalosInvitados
+(
+rgliId int AUTO_INCREMENT PRIMARY KEY NOT NULL,
+rgliListaPersona int not null, CONSTRAINT FOREIGN KEY(rgliListaPersona) REFERENCES listapersonas(lspId),
+rglliListaRegalo INT NOT NULL,CONSTRAINT FOREIGN KEY(rglliListaRegalo) REFERENCES listaregalos(lsrID)
+);
+
+
+
+
+CREATE TABLE ListaOrganizadores ( ldsoID INT NOT NULL AUTO_INCREMENT PRIMARY KEY, ldsoEvento int NOT NULL, CONSTRAINT FOREIGN KEY(ldsoEvento) REFERENCES evento(evnId), 
+ldsoPersona int NOT NULL, CONSTRAINT FOREIGN KEY(ldsoPersona) REFERENCES persona(psrId));
+
+
+CREATE TABLE estatusregalo
+(
+    ettrId int AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    ettrDescripcion varchar(50)
+);
+
+INSERT INTO estatusregalo(ettrDescripcion) VALUES('Disponible'), ('Ocupado');
+
+ALTER TABLE listaregalos ADD COLUMN lsrEstado INT NOT NULL,ADD CONSTRAINT FOREIGN KEY(lsrEstado) REFERENCES estatusregalo(ettrId);
+
+INSERT INTO persona(psrNombre, psrApellido1, psrApellido2, psrTelNum, psrEmail, psrPass) VALUES ('Jairo','Rivera','Céspedes','60047416','jairo.ri.ce@gmail.com','boda123'),('Regina','Palma','Sirias','62320564','boda@boda','boda123');
+
+ALTER TABLE evento ADD COLUMN evnDescripcion varchar(250) NOT NULL;
+
+ALTER TABLE evento ADD COLUMN evnUbicacion  VARCHAR(300) NULL;
+ALTER TABLE evento ADD COLUMN evrHoraInicio TIME NOT NULL,ADD evrHoraFinal TIME NOT NULL;
+
+
+
+/*
+SELECT E.evnId,p.psrId,LP.lspId,CONCAT(p.psrNombre,' ',p.psrApellido1,' ',p.psrApellido2) AS Nombre,E.evnFecha,E.evnDescripcion,c.cfrDescripcion,E.evnUbicacion FROM evento E 
+          INNER JOIN listapersonas LP ON lp.lpsEventp=E.evnId 
+          INNER JOIN persona p ON p.psrId=LP.lspPersona 
+          INNER JOIN confirmacion c ON C.cfrId=lp.lpsConfirmacion WHERE P.psrTelNum ='87870743';
+ 
+ 
+ 
+ UPDATE `listapersonas` SET `lpsConfirmacion`=1 WHERE lspId=1;         
+ */
+
